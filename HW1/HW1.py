@@ -1,6 +1,6 @@
 import numpy as np
 import csv
-
+import pandas as pd
 
 #读取csv文件 并设置台湾编码big5
 csv_reader = csv.reader(open('train.csv', encoding='big5'))
@@ -56,3 +56,30 @@ for i in range(iteration):
     w = w - learning*grad/ada
 
 #predict
+
+#读取预测数据
+csv_test = csv.reader(open('test.csv', encoding='big5'))
+#将object转换为二维list
+
+test_list =[]
+for row in csv_test:
+    test_list.append(row)
+
+pm2_5_test = []
+k = len(test_list)
+for i in range(k):
+    if (test_list[i][1] == "PM2.5"):
+        pm2_5_test.append(test_list[i][2:])
+x_test = np.array(pm2_5_test,float)
+
+x_test_b = np.concatenate((np.ones((x_test.shape[0],1)),x_test),axis=1)
+
+y_star = np.dot(x_test_b,w)
+
+y_pre=pd.read_csv('sampleSubmission.csv')
+
+y_pre.value=y_star
+real=pd.read_csv('ans.csv')
+error=abs(y_pre.value-real.value).sum()/len(real.value)
+
+print(error)
